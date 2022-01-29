@@ -14,6 +14,11 @@ nearest players to entities for control management
 
 u can change this system if you want
 
+
+you then need to add the entity instancer to an object, this is where u put
+ur entitys, so like the type (the int used to create that type of entity) and
+then a prefab of the entity with ur custom entity behaviour script added to it
+
 ### INTERFACING WITH UR CODE
 
 #### SUBMANAGER
@@ -82,6 +87,19 @@ DriftureManager.AttackEntity = (ulong entityId, int damage, object sender) => {
 
     //send the data to the server, the server should relay it
 };
+
+//to create an entity
+DriftureManager.CreateEntity = (int type, Vector3 position, byte[] metaData) => {
+
+    //send the data to the server, the server should relay it after doing this:
+    TODO THING HERE AMSDAJKSHDYIASGDIAULSHDILAUSHDLKASDH LKASJDHLKASJDHLKJASDHLKJASD
+};
+//to delete an entity
+DriftureManager.DeleteEntity = (ulong entityId) => {
+
+    //send the data to the server, the server should relay it after doing this:
+    TODO THING HERE AMSDAJKSHDYIASGDIAULSHDILAUSHDLKASDH LKASJDHLKASJDHLKJASDHLKJASD
+};
 ```
 the serevr shouild relay all of these back to the clients, after optional processing if it needs to do some stuff
 
@@ -125,10 +143,16 @@ EntityManager.SyncEntityMetaData = (ulong entityId, byte[] metaData) => {
 //recv the update data
 EntityManager.UpdateMetaData(entityId, metaData);
 ```
+##### `SPAWNING`
+```cs
+//u will recv from the server saying to spawn in an entity\
+//this is when an entity is added to the clients view
+EntityManager.SpawnEntity(entityId, type, position, metaData);
+```
 ##### `DESPAWNING`
 ```cs
-//u will recv from the server saying to desapawn and entity\
-//this is when an entity dies
+//u will recv from the server saying to desapawn an entity\
+//this is when an entity is removed from the clients view
 EntityManager.DespawnEntity(entityId);
 ```
 ##### `INTERACTION`
@@ -163,6 +187,18 @@ EntityManager.UpdateMetaData(entityId, metaData);
 //then relay it to all the other clients to
 ```
 
+the server also has some other stuff like spawnm and despawn, heres how to use it
+```cs
+EntityManager.SpawnEntity = (ulong entityId, int type, Vector3 pos, byte[] metaData) => {
+
+    //just set this up to relay to all clients
+};
+EntityManager.DespawnEntity = (ulong entityId) => {
+
+    //just set this up to relay as well
+};
+```
+
 ### DRIFTUREMANAGER
 
 this thing will give u functions to control stuff
@@ -178,4 +214,9 @@ DriftureManager.DespawnEntity (ulong entityId);
 DriftureManager.InteractEntity (ulong entityId, object sender);
 //attacks an entity
 DriftureManager.AttackEntity (ulong entityId, int damage, object sender);
+
+//creates a new entity
+DriftureManager.AttackEntity (int type, Vector3 position, byte[] metaData);
+//deletes an existing entity
+DriftureManager.AttackEntity (ulong entityId);
 ```

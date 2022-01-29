@@ -18,7 +18,13 @@ namespace Drifture {
         private static Dictionary<ulong, Entity> entities
             = new Dictionary<ulong, Entity>();
 
-        public static List<Entity> Entities => entities.Values.ToList();
+        public static List<Entity> Entities { get { mutex.WaitOne(); try {
+
+            return entities.Values.ToList();
+
+        } finally { mutex.ReleaseMutex(); } } }
+
+        private static ulong IdNext = 0;
 
 
         public static void UpdateControllingPlayer (ulong entityId, string playerNameId) { //called internally
@@ -30,6 +36,37 @@ namespace Drifture {
                 controllers[entityId] = playerNameId;
 
                 entities[entityId].controllerNameId = playerNameId;
+
+            } finally { mutex.ReleaseMutex(); }
+        }
+
+
+        public static void CreateEntity (int type, Vector3 pos, byte[] mData) {
+
+            mutex.WaitOne(); try {
+
+                Entity entity = new Entity {
+
+                    entityId = IdNext++,
+                    entityType = type,
+                    position = pos,
+                    metaData = mData
+                };
+
+                entities.Add(entity.entityId, entity);
+
+                SpawnEntity(entity.entityId, type, pos, mData);
+
+            } finally { mutex.ReleaseMutex(); }
+        }
+
+        public static void CreateEntity (ulong entityId) {
+
+            mutex.WaitOne(); try {
+
+                if (!entities.ContainsKey(entityId)) return;
+
+                entities.Remove(entityId);
 
             } finally { mutex.ReleaseMutex(); }
         }
@@ -57,11 +94,15 @@ namespace Drifture {
 
             } finally { mutex.ReleaseMutex(); }
         }
+
+        public static Action <ulong, int, Vector3, byte[]> SpawnEntity;
+        public static Action <ulong> DespawnEntity;
     }
 
     public class Entity {
 
         public ulong entityId;
+        public int entityType;
         public string controllerNameId;
         public Vector3 position;
         public Quaternion rotation;

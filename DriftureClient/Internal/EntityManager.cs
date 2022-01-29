@@ -20,9 +20,9 @@ namespace Drifture {
 
         public static void UpdateControl (ulong entityId, string playerNameId) { //called internally
 
-            if (!entities.ContainsKey(entityId)) return;
-
             controllers[entityId] = playerNameId;
+
+            if (!entities.ContainsKey(entityId)) return;
 
             entities[entityId].controller = playerNameId;
         }
@@ -42,11 +42,24 @@ namespace Drifture {
             entities[entityId].OnMetaDataSet(metaData);
         }
 
+        public static void SpawnEntity (ulong entityId, int type, Vector3 entityPosition, byte[] metaData) {
+
+            if (entities.ContainsKey(entityId)) return;
+
+            EntityBehaviour behaviour = GameObject.FindObjectOfType<EntityInstancer>().CreateInstance(type, entityPosition);
+            behaviour.OnMetaDataSet(metaData);
+            behaviour.entityId = entityId;
+
+            entities.Add(entityId, behaviour);
+        }
+
         public static void DespawnEntity (ulong entityId) {
 
             if (!entities.ContainsKey(entityId)) return;
 
             entities[entityId].OnDespawnEvent();
+            GameObject.Destroy(entities[entityId].gameObject);
+            entities.Remove(entityId);
         }
 
         public static void InteractEntity (ulong entityId, object sender) {
