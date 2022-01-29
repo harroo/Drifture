@@ -72,11 +72,6 @@ it a `string`
 
 then there are some functions u can configure
 ```cs
-//to kill/despawn and entity
-DriftureManager.DespawnEntity = (ulong entityId) => {
-
-    //send the data to the server, the server should relay it
-};
 //to interact with an entity
 DriftureManager.InteractEntity = (ulong entityId, object sender) => {
 
