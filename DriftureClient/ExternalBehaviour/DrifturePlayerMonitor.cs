@@ -3,14 +3,16 @@ using UnityEngine;
 
 using System;
 
+using Drifture;
+
 public class DrifturePlayerMonitor : MonoBehaviour {
 
     private float timer = 1.0f;
 
     private void Update () {
 
-        __timer -= Time.deltaTime;
-        if (__timer < 0) __timer = 1.64f; else return;
+        timer -= Time.deltaTime;
+        if (timer < 0) timer = 1.64f; else return;
 
         Submanager.SyncPlayerPosToServer(transform.position);
     }

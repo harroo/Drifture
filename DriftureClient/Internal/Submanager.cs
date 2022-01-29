@@ -39,12 +39,12 @@ namespace Drifture {
 
         public static void UpdateControl (byte[] updateData) {
 
-            mutex.WaitOne() try {
+            mutex.WaitOne(); try {
 
                 ulong entityId = BitConverter.ToUInt64(updateData, 0);
 
-                byte[] nameData = new byte[playerData.Length - 8];
-                Buffer.BlockCopy(playerData, 8, nameData, 0, nameData.Length);
+                byte[] nameData = new byte[updateData.Length - 8];
+                Buffer.BlockCopy(updateData, 8, nameData, 0, nameData.Length);
                 string playerNameId = Encoding.Unicode.GetString(nameData);
 
                 EntityManager.UpdateControl(entityId, playerNameId);

@@ -64,8 +64,8 @@ namespace Drifture {
         }
 
 
-        public static Action UpdateEntityPosition (ulong, Vector3, Quaternion);
-        public static Action EnsureEntityPosition (ulong, Vector3, Quaternion);
-        public static Action SyncEntityMetaData (ulong, byte[]);
+        public static Action <ulong, Vector3, Quaternion> UpdateEntityPosition;
+        public static Action <ulong, Vector3, Quaternion> EnsureEntityPosition;
+        public static Action <ulong, byte[]> SyncEntityMetaData;
     }
 }

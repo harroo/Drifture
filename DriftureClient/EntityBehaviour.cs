@@ -1,12 +1,14 @@
 
 using UnityEngine;
 
+using Drifture;
+
 public class EntityBehaviour : MonoBehaviour {
 
     public bool isLocal
         => controller == DriftureManager.thisName;
 
-    [HideInInspector] public string controllingPlayer;
+    [HideInInspector] public string controller;
     [HideInInspector] public ulong entityId;
     [HideInInspector] public int entityType;
 

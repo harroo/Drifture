@@ -2,6 +2,7 @@
 using UnityEngine;
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -17,37 +18,51 @@ namespace Drifture {
         private static Dictionary<ulong, Entity> entities
             = new Dictionary<ulong, Entity>();
 
+        public static List<Entity> Entities => entities.Values.ToList();
 
-        public static void UpdateControl (ulong entityId, string playerNameId) { //called internally
 
-            if (!entities.ContainsKey(entityId)) return;
+        public static void UpdateControllingPlayer (ulong entityId, string playerNameId) { //called internally
 
-            controllers[entityId] = playerNameId;
+            mutex.WaitOne(); try {
 
-            entities[entityId].controllingNameId = playerNameId;
+                if (!entities.ContainsKey(entityId)) return;
+
+                controllers[entityId] = playerNameId;
+
+                entities[entityId].controllerNameId = playerNameId;
+
+            } finally { mutex.ReleaseMutex(); }
         }
 
 
         public static void UpdateTransform (ulong entityId, Vector3 entityPosition, Quaternion entityRotation) {
 
-            if (!entities.ContainsKey(entityId)) return;
+            mutex.WaitOne(); try {
 
-            entities[entityId].position = entityPosition;
-            entities[entityId].rotation = entityRotation;
+                if (!entities.ContainsKey(entityId)) return;
+
+                entities[entityId].position = entityPosition;
+                entities[entityId].rotation = entityRotation;
+
+            } finally { mutex.ReleaseMutex(); }
         }
 
         public static void UpdateMetaData (ulong entityId, byte[] metaData) {
 
-            if (!entities.ContainsKey(entityId)) return;
+            mutex.WaitOne(); try {
 
-            entities[entityId].metaData = metaData;
+                if (!entities.ContainsKey(entityId)) return;
+
+                entities[entityId].metaData = metaData;
+
+            } finally { mutex.ReleaseMutex(); }
         }
     }
 
     public class Entity {
 
         public ulong entityId;
-        public string controllingNameId;
+        public string controllerNameId;
         public Vector3 position;
         public Quaternion rotation;
         public byte[] metaData;

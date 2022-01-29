@@ -37,7 +37,7 @@ namespace Drifture {
 
         public static void UpdateControl (ulong entityId, string playerNameId) {
 
-            mutex.WaitOne() try {
+            mutex.WaitOne(); try {
 
                 EntityManager.UpdateControllingPlayer(entityId, playerNameId);
 
@@ -56,7 +56,7 @@ namespace Drifture {
 
             mutex.WaitOne(); try {
 
-                foreach (var entity in EntityManager.entities.Values) {
+                foreach (var entity in EntityManager.Entities) {
 
                     double closest = Mathf.Infinity;
                     string playerNameId = "";
@@ -75,7 +75,7 @@ namespace Drifture {
 
                     if (playerNameId == entity.controllerNameId) continue;
 
-                    UpdateControl(entity.Id, playerNameId);
+                    UpdateControl(entity.entityId, playerNameId);
                 }
 
             } finally { mutex.ReleaseMutex(); }
