@@ -21,6 +21,8 @@ then a prefab of the entity with ur custom entity behaviour script added to it
 
 ### INTERFACING WITH UR CODE
 
+just read thru these steps and follow along in ur own way
+
 #### SUBMANAGER
 
 the submanager basicly controls who is controlling what entity;
@@ -86,14 +88,14 @@ DriftureManager.AttackEntity = (ulong entityId, int damage, object sender) => {
 //to create an entity
 DriftureManager.CreateEntity = (int type, Vector3 position, byte[] metaData) => {
 
-    //send the data to the server, the server should relay it after doing this:
-    TODO THING HERE AMSDAJKSHDYIASGDIAULSHDILAUSHDLKASDH LKASJDHLKASJDHLKJASDHLKJASD
+    //send the data to the server, the server should do this with it:
+    EntityManager.CreateEntity(type, position, metaData);
 };
 //to delete an entity
 DriftureManager.DeleteEntity = (ulong entityId) => {
 
-    //send the data to the server, the server should relay it after doing this:
-    TODO THING HERE AMSDAJKSHDYIASGDIAULSHDILAUSHDLKASDH LKASJDHLKASJDHLKJASDHLKJASD
+    //send the data to the server, the server should do this with it:
+    EntityManager.DeleteEntity(entityId);
 };
 ```
 the serevr shouild relay all of these back to the clients, after optional processing if it needs to do some stuff
@@ -142,7 +144,7 @@ EntityManager.UpdateMetaData(entityId, metaData);
 ```cs
 //u will recv from the server saying to spawn in an entity\
 //this is when an entity is added to the clients view
-EntityManager.SpawnEntity(entityId, type, position, metaData);
+EntityManager.SpawnEntity(entityId, type, position, rotation, metaData);
 ```
 ##### `DESPAWNING`
 ```cs
@@ -161,7 +163,7 @@ EntityManager.InteractEntity(entityId, senderObject);
 ```cs
 //u will recv from the server to attack with a entity
 //you then call with the data:
-EntityManager.AttackEntity(entityId, senderObject);
+EntityManager.AttackEntity(entityId, damage, senderObject);
 //u choose what sender is
 ```
 
@@ -184,15 +186,25 @@ EntityManager.UpdateMetaData(entityId, metaData);
 
 the server also has some other stuff like spawnm and despawn, heres how to use it
 ```cs
-EntityManager.SpawnEntity = (ulong entityId, int type, Vector3 pos, byte[] metaData) => {
+EntityManager.SpawnEntityTo = (ulong entityId, int type, Vector3 pos, Quaternion rot, byte[] metaData, string targetPlayerNameId) => {
+
+    //just set this up to relay to all the specified client
+};
+EntityManager.SpawnEntity = (ulong entityId, int type, Vector3 pos, Quaternion rot, byte[] metaData) => {
 
     //just set this up to relay to all clients
+};
+EntityManager.DespawnEntity = (ulong entityId, string targetPlayerNameId) => {
+
+    //just set this up to relay to all the specified client
 };
 EntityManager.DespawnEntity = (ulong entityId) => {
 
     //just set this up to relay as well
 };
 ```
+
+everything else will just need to be relayed, so all the interact, attack, all just relay that stuff
 
 ### DRIFTUREMANAGER
 
@@ -214,4 +226,60 @@ DriftureManager.AttackEntity (ulong entityId, int damage, object sender);
 DriftureManager.AttackEntity (int type, Vector3 position, byte[] metaData);
 //deletes an existing entity
 DriftureManager.AttackEntity (ulong entityId);
+```
+
+### ENTITY SCRIPTING
+
+so u have this `EntityBehaviour : MonoBehaviour`, u can use it the same
+like so ur thing is liek `Skeleton : EntityBehaviour` and it has monobehaviour
+and all the entity stuff in it, so u derive from that, and heres ur list of functions u can use
+
+```cs
+public virtual void Spawn () {} //called from Start();
+
+public virtual void Tick () {} //called once per frame if locally controlled
+
+public virtual void UnlocalTick () {} //called once per frame even if not locally controlled
+
+public virtual void OnDespawn () {} //called on despawn locally only
+
+public virtual void OnDespawnShow () {} //called on despawn no matter what
+
+public virtual void OnInteract (object sender) {} //called when right clicked only if local
+
+public virtual void OnInteractShow (object sender) {} //called when right clicked no matter what
+
+public virtual void OnAttack (int damage, object sender) {} //called when left clicked only if local
+
+public virtual void OnAttackShow (int damage, object sender) {} //called when left clicked no matter what
+
+public virtual void OnMetaDataSet (byte[] metaData) {} //called when metadata is set local or not
+
+public virtual byte[] MetaDataRequest () { return new byte[0]; } //called as a req for the meta data
+```
+use them like
+
+```cs
+public override void Spawn () {
+    Debug.Log("hello world");
+}
+public override void Tick () {
+    //u get the idea
+}
+```
+
+and in the thing like u can just say
+
+```cs
+hit.collider.GetComponent<EntityBehaviour>().entityId;
+```
+easy
+
+functions u can call are
+```cs
+//this will sync the meta data upto the server
+//so when u change something in the metadata and
+//want to sync it up and save etc, call this
+//it will call virtual byte[] MetaDataRequest();
+SyncMetaData();
 ```

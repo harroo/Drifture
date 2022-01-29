@@ -18,19 +18,41 @@ namespace Drifture {
         private static Dictionary<string, Vector3> playerPosCache
             = new Dictionary<string, Vector3>();
 
+        private static Dictionary<string, Dictionary<ulong, bool>> playerViewCache
+            = new Dictionary<string, Dictionary<ulong, bool>>();
+
+        private static int drawRange = 256;
+
+        public static void SetRange (int range) { mutex.WaitOne(); try {
+
+            drawRange = range;
+
+        } finally { mutex.ReleaseMutex(); } }
+
+
         public static void UpdatePlayerPos (byte[] playerData) {
 
             mutex.WaitOne(); try {
 
-                float x = BitConverter.ToInt32(playerData, 0);
-                float y = BitConverter.ToInt32(playerData, 4);
-                float z = BitConverter.ToInt32(playerData, 8);
+                float x = BitConverter.ToSingle(playerData, 0);
+                float y = BitConverter.ToSingle(playerData, 4);
+                float z = BitConverter.ToSingle(playerData, 8);
 
                 byte[] nameData = new byte[playerData.Length - 12];
                 Buffer.BlockCopy(playerData, 12, nameData, 0, nameData.Length);
                 string playerNameId = Encoding.Unicode.GetString(nameData);
 
                 playerPosCache[playerNameId] = new Vector3(x, y, z);
+
+            } finally { mutex.ReleaseMutex(); }
+        }
+
+        public static void ClearPlayerCache (string playerNameId) {
+
+            mutex.WaitOne(); try {
+
+                playerPosCache.Remove(playerNameId);
+                playerViewCache.Remove(playerNameId);
 
             } finally { mutex.ReleaseMutex(); }
         }
@@ -56,6 +78,7 @@ namespace Drifture {
 
             mutex.WaitOne(); try {
 
+                //check control
                 foreach (var entity in EntityManager.Entities) {
 
                     double closest = Mathf.Infinity;
@@ -76,6 +99,48 @@ namespace Drifture {
                     if (playerNameId == entity.controllerNameId) continue;
 
                     UpdateControl(entity.entityId, playerNameId);
+                }
+
+                //check view
+                foreach (var entity in EntityManager.Entities) {
+
+                    foreach (var kvp in playerPosCache) {
+
+                        if (!playerViewCache.ContainsKey(kvp.Key))
+                            playerViewCache.Add(kvp.Key, new Dictionary<ulong, bool>());
+
+                        if (!playerViewCache[kvp.Key].ContainsKey(entity.entityId))
+                            playerViewCache[kvp.Key].Add(entity.entityId, false);
+
+                        //if entity is in range of player
+                        double distance = (kvp.Value - entity.position).magnitude;
+                        if (distance < drawRange) {
+
+                            //if the player cant see the entity
+                            if (!playerViewCache[kvp.Key][entity.entityId]) {
+
+                                Debug.Log("send creature to player");
+
+                                playerViewCache[kvp.Key][entity.entityId] = true;
+                                EntityManager.SpawnEntityTo(
+                                    entity.entityId, entity.entityType,
+                                    entity.position, entity.rotation,
+                                    entity.metaData, kvp.Key
+                                );
+                            }
+
+                        } else {
+
+                            //if the playuer can see the entity
+                            if (playerViewCache[kvp.Key][entity.entityId]) {
+
+                                Debug.Log("send creature away from player");
+
+                                playerViewCache[kvp.Key][entity.entityId] = false;
+                                EntityManager.DespawnEntityTo(entity.entityId, kvp.Key);
+                            }
+                        }
+                    }
                 }
 
             } finally { mutex.ReleaseMutex(); }

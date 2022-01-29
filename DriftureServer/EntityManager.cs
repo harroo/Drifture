@@ -55,18 +55,20 @@ namespace Drifture {
 
                 entities.Add(entity.entityId, entity);
 
-                SpawnEntity(entity.entityId, type, pos, mData);
+                SpawnEntity(entity.entityId, type, pos, Quaternion.identity, mData);
 
             } finally { mutex.ReleaseMutex(); }
         }
 
-        public static void CreateEntity (ulong entityId) {
+        public static void DeleteEntity (ulong entityId) {
 
             mutex.WaitOne(); try {
 
                 if (!entities.ContainsKey(entityId)) return;
 
                 entities.Remove(entityId);
+
+                DespawnEntity(entityId);
 
             } finally { mutex.ReleaseMutex(); }
         }
@@ -95,8 +97,10 @@ namespace Drifture {
             } finally { mutex.ReleaseMutex(); }
         }
 
-        public static Action <ulong, int, Vector3, byte[]> SpawnEntity;
+        public static Action <ulong, int, Vector3, Quaternion, byte[]> SpawnEntity;
+        public static Action <ulong, int, Vector3, Quaternion, byte[], string> SpawnEntityTo;
         public static Action <ulong> DespawnEntity;
+        public static Action <ulong, string> DespawnEntityTo;
     }
 
     public class Entity {

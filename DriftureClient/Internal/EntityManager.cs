@@ -42,11 +42,11 @@ namespace Drifture {
             entities[entityId].OnMetaDataSet(metaData);
         }
 
-        public static void SpawnEntity (ulong entityId, int type, Vector3 entityPosition, byte[] metaData) {
+        public static void SpawnEntity (ulong entityId, int type, Vector3 position, Quaternion rotation, byte[] metaData) {
 
             if (entities.ContainsKey(entityId)) return;
 
-            EntityBehaviour behaviour = GameObject.FindObjectOfType<EntityInstancer>().CreateInstance(type, entityPosition);
+            EntityBehaviour behaviour = GameObject.FindObjectOfType<EntityInstancer>().CreateInstance(type, position, rotation);
             behaviour.OnMetaDataSet(metaData);
             behaviour.entityId = entityId;
 
