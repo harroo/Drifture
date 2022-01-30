@@ -19,7 +19,8 @@ public class EntityBehaviour : MonoBehaviour {
     private void Start () {
 
         __rigidBody = GetComponent<Rigidbody>();
-        rigidbodyConstraints = __rigidBody.constraints;
+        if (__rigidBody != null)
+            rigidbodyConstraints = __rigidBody.constraints;
 
         Spawn();
     }
