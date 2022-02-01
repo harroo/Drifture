@@ -49,6 +49,7 @@ namespace Drifture {
             EntityBehaviour behaviour = GameObject.FindObjectOfType<EntityInstancer>().CreateInstance(type, position, rotation);
             behaviour.OnMetaDataSet(metaData);
             behaviour.entityId = entityId;
+            behaviour.controller = controllers.ContainsKey(entityId) ? controllers[entityId] : "";
 
             entities.Add(entityId, behaviour);
         }
