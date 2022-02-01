@@ -283,3 +283,15 @@ functions u can call are
 //it will call virtual byte[] MetaDataRequest();
 SyncMetaData();
 ```
+
+
+## EXAMPLES
+
+for some good example of how to use this thing in action, check out
+this: https://github.com/harroo/fps-test
+
+check out these files:
+client:
+https://github.com/harroo/fps-test/blob/main/fps-test-game/Assets/Scripts/Game/System/DriftureInterface.cs
+server:
+https://github.com/harroo/fps-test/blob/main/fps-test-server/Assets/Scripts/DriftureInterface.cs
