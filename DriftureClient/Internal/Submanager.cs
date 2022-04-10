@@ -73,5 +73,15 @@ namespace Drifture {
 
             } finally { mutex.ReleaseMutex(); }
         }
+
+        public static void Clear () {
+
+            mutex.WaitOne(); try {
+
+                inMessageQueue.Clear();
+                outMessageQueue.Clear();
+
+            } finally { mutex.ReleaseMutex(); }
+        }
     }
 }

@@ -77,6 +77,12 @@ namespace Drifture {
             entities[entityId].OnAttackEvent(damage, sender);
         }
 
+        public static void Clear () {
+
+            controllers.Clear();
+            entities.Clear();
+        }
+
 
         public static Action <ulong, Vector3, Quaternion> UpdateEntityPosition;
         public static Action <ulong, Vector3, Quaternion> EnsureEntityPosition;
