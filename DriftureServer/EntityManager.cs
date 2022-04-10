@@ -24,6 +24,22 @@ namespace Drifture {
 
         } finally { mutex.ReleaseMutex(); } } }
 
+        public static Dictionary<ulong, Entity> GetEntityData () { mutex.WaitOne(); try {
+
+            return entities;
+
+        } finally { mutex.ReleaseMutex(); } }
+        public static void SetEntityData (Dictionary<ulong, Entity> data) { mutex.WaitOne(); try {
+
+            entities = data;
+
+            ulong highestId = 0;
+            foreach (var id in data.Keys) if (id > highestId) highestId = id;
+
+            IdNext = highestId + 1;
+
+        } finally { mutex.ReleaseMutex(); } }
+
         private static ulong IdNext = 0;
 
 
@@ -36,6 +52,20 @@ namespace Drifture {
                 controllers[entityId] = playerNameId;
 
                 entities[entityId].controllerNameId = playerNameId;
+
+            } finally { mutex.ReleaseMutex(); }
+        }
+
+
+        public static void ClearPlayerCache (string playerNameId) {
+
+            mutex.WaitOne(); try {
+
+                foreach (ulong entityId in entities.Keys) {
+
+                    if (controllers[entityId] == playerNameId)
+                        UpdateControllingPlayer(entityId, "");
+                }
 
             } finally { mutex.ReleaseMutex(); }
         }
@@ -101,13 +131,20 @@ namespace Drifture {
         public static Action <ulong, string> DespawnEntityTo;
     }
 
+    [Serializable]
     public class Entity {
 
         public ulong entityId;
         public int entityType;
         public string controllerNameId;
-        public Vector3 position;
-        public Quaternion rotation;
+        private float px, py, pz; public Vector3 position {
+            get { return new Vector3(px, py, pz); }
+            set { px = value.x; py = value.y; pz = value.pz; }
+        }
+        private float rx, ry, rz, rw; public Quaternion rotation {
+            get { return new Quaternion(rx, ry, rz, rw); }
+            set { rx = value.x; ry = value.y; rz = value.z; rw = value.w; }
+        }
         public byte[] metaData;
     }
 }
